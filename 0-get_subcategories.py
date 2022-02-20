@@ -1,4 +1,5 @@
 import json
+
 import bs4
 import requests
 
@@ -28,6 +29,9 @@ def get_categories(soup: bs4.BeautifulSoup):
     # get the department container
     department_divs = soup.find_all('div', {'class': 'item util-clearfix'})
 
+    # counter to have an id for each subcategory
+    id_subcategory = 1
+
     # process department container
     for department in department_divs:
         department_name = department.find('h3', {'class': 'big-title'})
@@ -47,11 +51,13 @@ def get_categories(soup: bs4.BeautifulSoup):
                 information = {
                     'department': department_name,
                     'category': category_name,
-                    'category': category_name,
                     'category_link': category_link,
                     'subcategory': subcategory_name,
-                    'subcategory_link': subcategory_link
+                    'subcategory_link': subcategory_link,
+                    'id': id_subcategory
                 }
+                id_subcategory = id_subcategory + 1
+
                 # append dictionary to the list
                 list_information.append(information)
 
