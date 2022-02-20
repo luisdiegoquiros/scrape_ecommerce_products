@@ -128,3 +128,6 @@ data/
 
 # IDE data
 .idea/
+
+# External data
+ext/
