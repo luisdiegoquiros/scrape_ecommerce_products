@@ -1,6 +1,6 @@
-import requests
+import json
 import bs4
-import pandas as pd
+import requests
 
 
 def get_data(url, headers) -> bs4.BeautifulSoup:
@@ -16,9 +16,9 @@ def get_data(url, headers) -> bs4.BeautifulSoup:
     return soup
 
 
-def get_categories(soup: bs4.BeautifulSoup) -> pd.DataFrame:
+def get_categories(soup: bs4.BeautifulSoup):
     """
-    From a URL gets the departments, categories and subcategories
+    From a URL gets the departments, categories and subcategories.
     :param soup: BeautifulSoup object with the data from the webpage
     :return: Pandas DataFrame with the information
     """
@@ -55,11 +55,11 @@ def get_categories(soup: bs4.BeautifulSoup) -> pd.DataFrame:
                 # append dictionary to the list
                 list_information.append(information)
 
-    # results are stored in a pd.DataFrame
-    results = pd.DataFrame(list_information)
-    return results
+    # returns list of dictionaries with the data
+    return list_information
 
 
+# URL with all the categories
 url = 'https://www.alibaba.com/Products'
 
 headers = {
@@ -67,5 +67,8 @@ headers = {
 }
 
 soup = get_data(url, headers)
-categories = get_categories(soup)
-print(categories)
+all_subcategories = get_categories(soup)
+
+# Writes the information on a json file
+with open('data/categories.json', 'w') as fp:
+    json.dump(all_subcategories, fp, indent=4)
