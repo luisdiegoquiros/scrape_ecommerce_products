@@ -1,26 +1,31 @@
 import json
 import time
+from joblib import Parallel, delayed
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
-# Run headless browser
-options = Options()
-options.add_argument('--headless')
 
-# Loads the Chrome driver
-s = Service('ext/chromedriver.exe')
-driver = webdriver.Chrome(service=s, options=options)
+from joblib.externals.loky import set_loky_pickler
 
-# Loads JSON with the URL
-with open('data/categories.json', 'r') as file:
-    data = json.load(file)
+set_loky_pickler("dill")
 
-# Get products in each subcategory
-for subcategory in data:
 
+def process_subcategory(subcategory):
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.chrome.options import Options
+    import time
     print(f'Starting with category ID: {subcategory["id"]}')
+
+    # Loads the Chrome driver
+    # Run headless browser
+    options = Options()
+    options.add_argument('--headless')
+    s = Service('ext/chromedriver.exe')
+    driver = webdriver.Chrome(service=s, options=options)
 
     # Gets the url
     driver.get(subcategory['subcategory_link'])
@@ -33,8 +38,6 @@ for subcategory in data:
     products = driver.find_elements(By.CSS_SELECTOR, 'div.organic-offer-wrapper')
 
     results = []
-
-    # finds all the products and saves the data
     for p in products:
         # if a product doesnt have one of the fields, skips it
         try:
@@ -51,8 +54,25 @@ for subcategory in data:
         except:
             pass
 
+
+
+    # Closes the driver
+    driver.close()
+    return results
+
+
+
+
+
+# Loads JSON with the URL
+with open('data/categories.json', 'r') as file:
+    data = json.load(file)
+
+# Get products in each subcategory
+results = Parallel(n_jobs=6)(delayed(process_subcategory)(d) for d in data)
+
 # Writes the information on a json file
 with open('data/products.json', 'w') as fp:
     json.dump(results, fp, indent=4)
 
-driver.close()
+
