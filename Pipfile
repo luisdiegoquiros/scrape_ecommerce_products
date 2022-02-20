@@ -7,6 +7,9 @@ name = "pypi"
 requests = "*"
 beautifulsoup4 = "*"
 pandas = "*"
+selenium = "*"
+selenium-chrome = "*"
+webdriver-manager = "*"
 
 [dev-packages]
 
